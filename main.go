@@ -29,20 +29,14 @@ type Agent struct {
 	Link        string `json:"link"`
 }
 
-// json
-type Agents struct {
-	Agents []Agent `json:"agents"`
-}
-
 var AllAgents []Agent
 var File = "./arknight_agents.json"
 
 func main() {
-	_, err := os.Stat(File)
-	if os.IsExist(err) {
-		readAgents()
-	} else {
+	if _, err := os.Stat(File); os.IsNotExist(err) {
 		fetchAgents()
+	} else {
+		readAgents()
 	}
 	downloadAgentsImage()
 }
@@ -100,7 +94,7 @@ func fetchAgents() {
 					AllAgents = append(AllAgents, agent)
 				})
 			})
-			r.Exports <- Agents{AllAgents}
+			r.Exports <- AllAgents
 		},
 	}).Start()
 }
@@ -110,12 +104,10 @@ func readAgents() {
 	if err != nil {
 		panic(err)
 	}
-	var data Agents
-	err = json.Unmarshal(bytes, &data)
+	err = json.Unmarshal(bytes, &AllAgents)
 	if err != nil {
 		panic(err)
 	}
-	AllAgents = data.Agents
 }
 
 func downloadAgentsImage() {
