@@ -4,5 +4,5 @@ LDFLAGS=-ldflags "-s -w"
 all: build
 
 build:
-	rm -f arknights
+	rm -f ${BINARY}
 	go build ${LDFLAGS} -o ${BINARY}
