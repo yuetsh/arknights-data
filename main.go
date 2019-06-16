@@ -38,8 +38,12 @@ var AllAgents []Agent
 var File = "./arknight_agents.json"
 
 func main() {
-	fetchAgents()
-	readAgents()
+	_, err := os.Stat(File)
+	if os.IsExist(err) {
+		readAgents()
+	} else {
+		fetchAgents()
+	}
 	downloadAgentsImage()
 }
 
@@ -115,6 +119,7 @@ func readAgents() {
 }
 
 func downloadAgentsImage() {
+	_ = os.RemoveAll("images")
 	log.Println("Downloading Started")
 	var wg sync.WaitGroup
 	for _, agent := range AllAgents {
