@@ -56,7 +56,7 @@ func fetchAgents() {
 					title, _ := link.Attr("title")
 					href, _ := link.Attr("href")
 					img, _ := link.Find("img").Attr("src")
-					img = strings.Replace(img, "/dr/150__", "", -1)
+					img = strings.ReplaceAll(img, "/dr/150__", "")
 					agent := Agent{Name: title, Link: "http://wiki.joyme.com" + href, Avatar: img}
 					r.Geziyor.Get(agent.Link, func(r *geziyor.Response) {
 						// 基本信息
@@ -84,11 +84,11 @@ func fetchAgents() {
 						// 图片信息
 						img1 := r.DocHTML.Find("#con_1 > div > div > a > img")
 						if img, exists := img1.Attr("src"); exists {
-							agent.Image1 = strings.Replace(img, "/dr/1120__", "", -1)
+							agent.Image1 = strings.ReplaceAll(img, "/dr/1120__", "")
 						}
 						img2 := r.DocHTML.Find("#con_2 > div > div > a > img")
 						if img, exists := img2.Attr("src"); exists {
-							agent.Image2 = strings.Replace(img, "/dr/1120__", "", -1)
+							agent.Image2 = strings.ReplaceAll(img, "/dr/1120__", "")
 						}
 					})
 					AllAgents = append(AllAgents, agent)
