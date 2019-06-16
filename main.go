@@ -14,7 +14,6 @@ import (
 
 // 干员信息
 type Agent struct {
-	//基本信息
 	Name        string `json:"name"`
 	EnglishName string `json:"english_name"`
 	Slogan      string `json:"slogan"`
@@ -35,9 +34,8 @@ type Agents struct {
 	Agents []Agent `json:"agents"`
 }
 
-// 全部干员
 var AllAgents []Agent
-var File = "arknight_agents.json"
+var File = "./arknight_agents.json"
 
 func main() {
 	fetchAgents()
@@ -52,7 +50,7 @@ func fetchAgents() {
 		Exporters: []geziyor.Exporter{exporter.JSONExporter{
 			FileName: File,
 		}},
-		UserAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1 AlipayClient MicroMessenger",
+		UserAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36",
 		ParseFunc: func(r *geziyor.Response) {
 			r.DocHTML.Find("#Contentbox2 ").Children().Each(func(_ int, s *goquery.Selection) {
 				s.Find("table").Each(func(_ int, s *goquery.Selection) {
@@ -117,6 +115,7 @@ func readAgents() {
 }
 
 func downloadAgentsImage() {
+	log.Println("Downloading Started")
 	var wg sync.WaitGroup
 	for _, agent := range AllAgents {
 		wg.Add(1)
@@ -125,8 +124,9 @@ func downloadAgentsImage() {
 			DownloadImage(agent.Name, "image_1", agent.Image1)
 			DownloadImage(agent.Name, "image_2", agent.Image2)
 			wg.Done()
-			log.Println("Download", agent.Name)
+			log.Println("Downloaded", agent.Name)
 		}(agent)
 	}
 	wg.Wait()
+	log.Println("Finished")
 }

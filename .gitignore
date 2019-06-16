@@ -1,6 +1,7 @@
+.idea/
 .vscode/
 vender/
 go.sum
-.idea/
 images/
 arknight_agents.json
+arknights
