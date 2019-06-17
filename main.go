@@ -1,12 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/geziyor/geziyor"
@@ -21,15 +20,16 @@ type Agent struct {
 	Class       string  `json:"class"`
 	Star        string  `json:"star"`
 	Group       string  `json:"group"`
-	Profile     Profile `json:"profile"`
+	Profile     profile `json:"profile"`
 	Tag         string  `json:"tag"`
 	Character   string  `json:"character"`
 	Record      string  `json:"record"`
-	Image       Image   `json:"image"`
+	Image       image   `json:"image"`
 	Link        string  `json:"link"`
 }
 
-type Profile struct {
+// 干员档案信息
+type profile struct {
 	Position string `json:"position"`
 	Mastery  string `json:"mastery"`
 	XP       string `json:"xp"`
@@ -40,25 +40,32 @@ type Profile struct {
 	Status   string `json:"status"`
 }
 
-type Image struct {
+type image struct {
 	Image1 string `json:"image_1"`
 	Image2 string `json:"image_2"`
 }
 
-var AllAgents []Agent
-var File = "./arknight_agents.json"
+// 文件名
+var File = "arknight_agents.json"
 
 func main() {
-	if _, err := os.Stat(File); os.IsNotExist(err) {
+	file, err := os.Open(File)
+	defer file.Close()
+	if os.IsNotExist(err) {
 		fetchAgents()
-	} else {
-		readAgents()
 	}
-	downloadAgentsImage()
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		var agent Agent
+		err = json.Unmarshal(scanner.Bytes(), &agent)
+		DownloadImage(agent.Name, "image_1", agent.Image.Image1)
+		DownloadImage(agent.Name, "image_2", agent.Image.Image2)
+		log.Println("Downloaded", agent.Name)
+	}
 }
 
 func fetchAgents() {
-	_ = os.Remove(File)
 	geziyor.NewGeziyor(geziyor.Options{
 		StartURLs: []string{"http://wiki.joyme.com/arknights/%E5%9B%BE%E9%89%B4%E4%B8%80%E8%A7%88"},
 		Exporters: []geziyor.Exporter{exporter.JSONExporter{
@@ -78,40 +85,11 @@ func fetchAgents() {
 					r.Geziyor.Get(agent.Link, func(r *geziyor.Response) {
 						getAgentDetail(&agent, r)
 					})
-					AllAgents = append(AllAgents, agent)
+					r.Exports <- agent
 				})
 			})
-			r.Exports <- AllAgents
 		},
 	}).Start()
-}
-
-func readAgents() {
-	bytes, err := ioutil.ReadFile(File)
-	if err != nil {
-		panic(err)
-	}
-	err = json.Unmarshal(bytes, &AllAgents)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func downloadAgentsImage() {
-	_ = os.RemoveAll("images")
-	log.Println("Downloading Started")
-	var wg sync.WaitGroup
-	for _, agent := range AllAgents {
-		wg.Add(1)
-		go func(agent Agent) {
-			DownloadImage(agent.Name, "image_1", agent.Image.Image1)
-			DownloadImage(agent.Name, "image_2", agent.Image.Image2)
-			wg.Done()
-			log.Println("Downloaded", agent.Name)
-		}(agent)
-	}
-	wg.Wait()
-	log.Println("Finished")
 }
 
 func getAgentDetail(agent *Agent, r *geziyor.Response) {
