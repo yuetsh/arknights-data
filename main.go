@@ -61,11 +61,11 @@ func main() {
 		wg.Add(1)
 		var agent Agent
 		err = json.Unmarshal(scanner.Bytes(), &agent)
-		go func(agent Agent) {
+		go func(agent *Agent) {
 			DownloadImage(agent.Name, "image_1", agent.Image.Image1)
 			DownloadImage(agent.Name, "image_2", agent.Image.Image2)
 			wg.Done()
-		}(agent)
+		}(&agent)
 	}
 	wg.Wait()
 }
