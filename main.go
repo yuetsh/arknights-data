@@ -12,7 +12,7 @@ import (
 	"github.com/geziyor/geziyor/exporter"
 )
 
-// 干员信息
+// Agent 干员信息
 type Agent struct {
 	Name        string  `json:"name"`
 	EnglishName string  `json:"english_name"`
@@ -45,7 +45,7 @@ type image struct {
 	Image2 string `json:"image_2"`
 }
 
-// 文件名
+// File 文件名
 var File = "arknight_agents.json"
 
 func main() {
