@@ -24,9 +24,6 @@ func DownloadImage(folder, filename, url string) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(img, resp.Body)
-	if err != nil {
-		panic(err)
-	}
+	_, _ = io.Copy(img, resp.Body)
 	_ = img.Close()
 }
